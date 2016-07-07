@@ -32,6 +32,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		BFE76A5B1D2E7DFE00185BD8 /* Project.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = Project.xcconfig; sourceTree = "<group>"; };
 		E73A001F1C692734001E7C83 /* Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Tests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		E73A00211C692734001E7C83 /* Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tests.swift; sourceTree = "<group>"; };
 		E73A00231C692734001E7C83 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -70,6 +71,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		BFE76A5A1D2E7DFE00185BD8 /* Configs */ = {
+			isa = PBXGroup;
+			children = (
+				BFE76A5B1D2E7DFE00185BD8 /* Project.xcconfig */,
+			);
+			name = Configs;
+			path = Reductio.xcodeproj/Configs;
+			sourceTree = "<group>";
+		};
 		E73A00201C692734001E7C83 /* Tests */ = {
 			isa = PBXGroup;
 			children = (
@@ -91,6 +101,7 @@
 		E7D5B66C1C503D6A00F4AC74 = {
 			isa = PBXGroup;
 			children = (
+				BFE76A5A1D2E7DFE00185BD8 /* Configs */,
 				E7D5B6781C503D6A00F4AC74 /* Sources */,
 				E73A00201C692734001E7C83 /* Tests */,
 				E7BBB8701C5FDE0D00759A68 /* Frameworks */,
@@ -182,7 +193,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 0720;
-				LastUpgradeCheck = 0720;
+				LastUpgradeCheck = 0730;
 				ORGANIZATIONNAME = fdzsergio;
 				TargetAttributes = {
 					E73A001E1C692734001E7C83 = {
@@ -287,6 +298,7 @@
 		};
 		E7D5B67C1C503D6A00F4AC74 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = BFE76A5B1D2E7DFE00185BD8 /* Project.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
@@ -321,7 +333,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
@@ -334,6 +346,7 @@
 		};
 		E7D5B67D1C503D6A00F4AC74 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = BFE76A5B1D2E7DFE00185BD8 /* Project.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
@@ -362,7 +375,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
