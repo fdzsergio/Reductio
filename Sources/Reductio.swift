@@ -18,7 +18,7 @@ import Foundation
  
  */
 
-public func keywords(text: String, completion: ([String] -> Void)) {
+public func keywords(_ text: String, completion: (([String]) -> Void)) {
     completion(text.keywords)
 }
 
@@ -33,7 +33,7 @@ public func keywords(text: String, completion: ([String] -> Void)) {
 
  */
 
-public func keywords(text: String, count: Int, completion: ([String] -> Void)) {
+public func keywords(_ text: String, count: Int, completion: (([String]) -> Void)) {
     completion(text.keywords.slice(count))
 }
 
@@ -48,7 +48,7 @@ public func keywords(text: String, count: Int, completion: ([String] -> Void)) {
 
  */
 
-public func keywords(text: String, compression: Float, completion: ([String] -> Void)) {
+public func keywords(_ text: String, compression: Float, completion: (([String]) -> Void)) {
     completion(text.keywords.slice(compression))
 }
 
@@ -62,7 +62,7 @@ public func keywords(text: String, compression: Float, completion: ([String] -> 
 
  */
 
-public func summarize(text: String, completion: ([String] -> Void)) {
+public func summarize(_ text: String, completion: (([String]) -> Void)) {
     completion(text.summarize)
 }
 
@@ -77,7 +77,7 @@ public func summarize(text: String, completion: ([String] -> Void)) {
 
  */
 
-public func summarize(text: String, count: Int, completion: ([String] -> Void)) {
+public func summarize(_ text: String, count: Int, completion: (([String]) -> Void)) {
     completion(text.summarize.slice(count))
 }
 
@@ -92,7 +92,7 @@ public func summarize(text: String, count: Int, completion: ([String] -> Void)) 
 
  */
 
-public func summarize(text: String, compression: Float, completion: ([String] -> Void)) {
+public func summarize(_ text: String, compression: Float, completion: (([String]) -> Void)) {
     completion(text.summarize.slice(compression))
 }
 

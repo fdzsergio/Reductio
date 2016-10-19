@@ -49,47 +49,47 @@ class Tests: XCTestCase {
     }
 
     func testTextContainsSameKeywords() {
-        let expectation = expectationWithDescription("expect same keywords with different API")
+        let expectation = self.expectation(description: "expect same keywords with different API")
 
         Reductio.keywords(str) { words in
             XCTAssertEqual(words, self.keywords)
             expectation.fulfill()
         }
 
-        waitForExpectationsWithTimeout(1.0, handler:nil)
+        waitForExpectations(timeout: 1.0, handler:nil)
     }
 
     func testReductioKeywordsWithCounter() {
-        let expectation = expectationWithDescription("expect five keywords for text")
+        let expectation = self.expectation(description: "expect five keywords for text")
 
         Reductio.keywords(str, count: 5) { words in
             XCTAssertEqual(words.count, 5)
             expectation.fulfill()
         }
 
-        waitForExpectationsWithTimeout(1.0, handler:nil)
+        waitForExpectations(timeout: 1.0, handler:nil)
     }
 
     func testReductioKeywordsWithCompression() {
-        let expectation = expectationWithDescription("expect all keywords for text")
+        let expectation = self.expectation(description: "expect all keywords for text")
 
         Reductio.keywords(str, compression: 0) { words in
             XCTAssertEqual(words, self.keywords)
             expectation.fulfill()
         }
 
-        waitForExpectationsWithTimeout(1.0, handler:nil)
+        waitForExpectations(timeout: 1.0, handler:nil)
     }
 
     func testReductioKeywordsWithOutboundsCompression() {
-        let expectation = expectationWithDescription("no expect any keywords for text")
+        let expectation = self.expectation(description: "no expect any keywords for text")
 
         Reductio.keywords(str, compression: 2.0) { words in
             XCTAssert(words.isEmpty)
             expectation.fulfill()
         }
 
-        waitForExpectationsWithTimeout(1.0, handler:nil)
+        waitForExpectations(timeout: 1.0, handler:nil)
     }
 
     func testHasSummarize() {
@@ -98,36 +98,36 @@ class Tests: XCTestCase {
     }
 
     func testTextContainsSameSummarize() {
-        let expectation = expectationWithDescription("expect same summarize with different API")
+        let expectation = self.expectation(description: "expect same summarize with different API")
 
         Reductio.summarize(str) { sentences in
             XCTAssertEqual(sentences, self.summarize)
             expectation.fulfill()
         }
 
-        waitForExpectationsWithTimeout(1.0, handler:nil)
+        waitForExpectations(timeout: 1.0, handler:nil)
     }
 
     func testReductioSummarizeWithCounter() {
-        let expectation = expectationWithDescription("expect five sentences from summarize")
+        let expectation = self.expectation(description: "expect five sentences from summarize")
 
         Reductio.summarize(str, count: 5) { words in
             XCTAssertEqual(words.count, 5)
             expectation.fulfill()
         }
 
-        waitForExpectationsWithTimeout(1.0, handler:nil)
+        waitForExpectations(timeout: 1.0, handler:nil)
     }
 
     func testReductioSummarizeWithCompression() {
-        let expectation = expectationWithDescription("expect first sentence of summarize")
+        let expectation = self.expectation(description: "expect first sentence of summarize")
 
         Reductio.summarize(str, compression: 0.95) { sentence in
             XCTAssertEqual(sentence.count, 1)
             expectation.fulfill()
         }
 
-        waitForExpectationsWithTimeout(1.0, handler:nil)
+        waitForExpectations(timeout: 1.0, handler:nil)
     }
 
 }

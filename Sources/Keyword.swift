@@ -10,10 +10,10 @@ import Foundation
 
 internal class Keyword {
 
-    private let ngram: Int = 3
-    private var words: [String]
+    fileprivate let ngram: Int = 3
+    fileprivate var words: [String]
 
-    private lazy var ranking = TextRank<String>()
+    fileprivate lazy var ranking = TextRank<String>()
 
     init(text: String) {
         self.words = Keyword.preprocess(text)
@@ -23,7 +23,7 @@ internal class Keyword {
         filterWords()
         buildGraph()
         return ranking.execute()
-            .sort { $0.1 > $1.1 }
+            .sorted { $0.1 > $1.1 }
             .map { $0.0 }
     }
 
@@ -34,7 +34,7 @@ internal class Keyword {
     }
 
     func buildGraph() {
-        for (index, node) in words.enumerate() {
+        for (index, node) in words.enumerated() {
             var (min, max) = (index-ngram, index+ngram)
             if min < 0 { min = words.startIndex }
             if max > words.count { max = words.endIndex }
@@ -47,16 +47,16 @@ internal class Keyword {
 
 private extension Keyword {
 
-    static func preprocess(text: String) -> [String] {
-        return text.lowercaseString
-            .componentsSeparatedByCharactersInSet(NSCharacterSet.letterCharacterSet().invertedSet)
+    static func preprocess(_ text: String) -> [String] {
+        return text.lowercased()
+            .components(separatedBy: CharacterSet.letters.inverted)
     }
 
-    func removeShortWords(word: String) -> Bool {
+    func removeShortWords(_ word: String) -> Bool {
         return word.characters.count > 2
     }
 
-    func removeStopWords(word: String) -> Bool {
+    func removeStopWords(_ word: String) -> Bool {
         return !Stopwords.contains(word)
     }
 }
