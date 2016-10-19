@@ -10,7 +10,7 @@ import Foundation
 
 internal struct Search {
 
-    static func binary<T : Comparable>(array: [T], target: T) -> Bool {
+    static func binary<T : Comparable>(_ array: [T], target: T) -> Bool {
         var left = 0
         var right = array.count - 1
 

@@ -14,16 +14,16 @@ internal class TextRank<T: Hashable> {
     typealias Graph = [T: [T]]
     typealias Matrix = [T: Node]
 
-    private var graph       = Graph()
-    private var outlinks    = Edge()
-    private var nodes       = Node()
-    private var weights     = Matrix()
+    fileprivate var graph       = Graph()
+    fileprivate var outlinks    = Edge()
+    fileprivate var nodes       = Node()
+    fileprivate var weights     = Matrix()
 
     let score: Float = 0.15
     let damping: Float = 0.85
     let convergence: Float = 0.01
 
-    func addEdge(from: T, _ to: T, weight: Float = 1.0) {
+    func addEdge(_ from: T, _ to: T, weight: Float = 1.0) {
         if from == to { return }
 
         addNode(from, to)
@@ -42,7 +42,7 @@ internal class TextRank<T: Hashable> {
 
     //  Performs one iteration to calculate
     //  the PageRank ranking for all nodes.
-    private func iteration(nodes: Node) -> Node {
+    fileprivate func iteration(_ nodes: Node) -> Node {
         var vertex = Node()
         for (node, links) in graph {
             let score: Float = links.reduce(0.0) { $0 + nodes[$1] / outlinks[$1] * weights[$1, node] }
@@ -52,7 +52,7 @@ internal class TextRank<T: Hashable> {
     }
 
     // Check for convergence
-    private func convergence(current: Node, nodes: Node) -> Bool {
+    fileprivate func convergence(_ current: Node, nodes: Node) -> Bool {
         if current == nodes { return true }
         
         let total: Float = nodes.reduce(0.0) {
@@ -65,7 +65,7 @@ internal class TextRank<T: Hashable> {
 
 private extension TextRank {
 
-    func incrementOutlinks(source: T) {
+    func incrementOutlinks(_ source: T) {
         if let links = outlinks[source] {
             outlinks[source] = links + 1
         } else {
@@ -73,7 +73,7 @@ private extension TextRank {
         }
     }
 
-    func addNode(from: T, _ to: T) {
+    func addNode(_ from: T, _ to: T) {
         if var node = graph[to] {
             node.append(from)
             graph[to] = node
@@ -85,7 +85,7 @@ private extension TextRank {
         nodes[to] = score
     }
 
-    func addWeightToEdge(from: T, _ to: T, weight: Float) {
+    func addWeightToEdge(_ from: T, _ to: T, weight: Float) {
         if weights[from] == nil {
             weights[from] = Node()
             weights[from]![to] = weight

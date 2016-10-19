@@ -44,9 +44,9 @@ internal extension String {
     var sentences: [String] {
 
         var sentences = [String]()
-        let range = self.rangeOfString(self)
+        let range = self.range(of: self)
 
-        self.enumerateSubstringsInRange(range!, options: .BySentences)  { (substring, substringRange, enclosingRange, end) in
+        self.enumerateSubstrings(in: range!, options: .bySentences)  { (substring, substringRange, enclosingRange, end) in
             sentences.append(substring!)
         }
         

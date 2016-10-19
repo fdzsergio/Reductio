@@ -14,14 +14,14 @@ internal extension Array {
         return Float(self.count as Int)
     }
 
-    private func addCombo(previous: [Element], pivotal: [Element]) -> [([Element], [Element])] {
+    fileprivate func addCombo(_ previous: [Element], pivotal: [Element]) -> [([Element], [Element])] {
         var pivotal = pivotal
         return (0..<pivotal.count).map { _ -> ([Element], [Element]) in
-            return (previous + [pivotal.removeAtIndex(0)], pivotal)
+            return (previous + [pivotal.remove(at: 0)], pivotal)
         }
     }
 
-    func combinations(length: Int) -> [[Element]] {
+    func combinations(_ length: Int) -> [[Element]] {
 
         return [Int](1...length)
             .reduce([([Element](), self)]) { (accum, _) in
@@ -29,11 +29,11 @@ internal extension Array {
             }.map { $0.0 }
     }
 
-    func slice(length: Int) -> [Element] {
+    func slice(_ length: Int) -> [Element] {
         return self.prefix(length).map { $0 }
     }
 
-    func slice(percent: Float) -> [Element] {
+    func slice(_ percent: Float) -> [Element] {
         if 0.0...1.0 ~= percent {
             let count = Int((1-percent)*self.count)
             return slice(count)

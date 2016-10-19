@@ -10,9 +10,9 @@ import Foundation
 
 internal class Summarizer {
 
-    private let phrases: [Sentence]
+    fileprivate let phrases: [Sentence]
 
-    private let rank = TextRank<Sentence>()
+    fileprivate let rank = TextRank<Sentence>()
 
     init(text: String) {
         self.phrases = text.sentences.map(Sentence.init)
@@ -21,11 +21,11 @@ internal class Summarizer {
     func execute() -> [String] {
         buildGraph()
         return rank.execute()
-            .sort { $0.1 > $1.1 }
+            .sorted { $0.1 > $1.1 }
             .map { $0.0.text }
     }
 
-    private func buildGraph() {
+    fileprivate func buildGraph() {
         let combinations = self.phrases.combinations(2)
 
         combinations.forEach { combo in
@@ -33,7 +33,7 @@ internal class Summarizer {
         }
     }
 
-    private func addNodes(pivotal: Sentence, _ node: Sentence) {
+    fileprivate func addNodes(_ pivotal: Sentence, _ node: Sentence) {
         let pivotalWordCount: Float = pivotal.words.count
         let nodeWordCount: Float = node.words.count
 
