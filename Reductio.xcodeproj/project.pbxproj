@@ -9,10 +9,6 @@
 /* Begin PBXBuildFile section */
 		E73A00221C692734001E7C83 /* Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E73A00211C692734001E7C83 /* Tests.swift */; };
 		E73A00241C692734001E7C83 /* Reductio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E7D5B6761C503D6A00F4AC74 /* Reductio.framework */; };
-		E74D9E771EB8DE76000EE828 /* Common.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = E74D9E701EB8DE76000EE828 /* Common.xcconfig */; };
-		E74D9E781EB8DE76000EE828 /* Debug.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = E74D9E721EB8DE76000EE828 /* Debug.xcconfig */; };
-		E74D9E7A1EB8DE76000EE828 /* Release.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = E74D9E741EB8DE76000EE828 /* Release.xcconfig */; };
-		E74D9E7C1EB8DE76000EE828 /* Framework.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = E74D9E761EB8DE76000EE828 /* Framework.xcconfig */; };
 		E75EE6831C8C97BF00B35225 /* Search.swift in Sources */ = {isa = PBXBuildFile; fileRef = E75EE6821C8C97BF00B35225 /* Search.swift */; };
 		E75EE6851C8C98DD00B35225 /* Array+Combinations.swift in Sources */ = {isa = PBXBuildFile; fileRef = E75EE6841C8C98DD00B35225 /* Array+Combinations.swift */; };
 		E75EE6891C8CA1F800B35225 /* Stemmer.swift in Sources */ = {isa = PBXBuildFile; fileRef = E75EE6881C8CA1F800B35225 /* Stemmer.swift */; };
@@ -208,7 +204,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 0720;
-				LastUpgradeCheck = 0810;
+				LastUpgradeCheck = 0940;
 				ORGANIZATIONNAME = fdzsergio;
 				TargetAttributes = {
 					E73A001E1C692734001E7C83 = {
@@ -253,10 +249,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E74D9E7A1EB8DE76000EE828 /* Release.xcconfig in Resources */,
-				E74D9E781EB8DE76000EE828 /* Debug.xcconfig in Resources */,
-				E74D9E7C1EB8DE76000EE828 /* Framework.xcconfig in Resources */,
-				E74D9E771EB8DE76000EE828 /* Common.xcconfig in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -337,8 +329,13 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = E74D9E721EB8DE76000EE828 /* Debug.xcconfig */;
 			buildSettings = {
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				SDKROOT = iphoneos;
+				SWIFT_VERSION = 4.0;
 			};
 			name = Debug;
 		};
@@ -346,8 +343,14 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = E74D9E741EB8DE76000EE828 /* Release.xcconfig */;
 			buildSettings = {
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_VERSION = 4.0;
 			};
 			name = Release;
 		};

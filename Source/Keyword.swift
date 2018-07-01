@@ -53,7 +53,7 @@ private extension Keyword {
     }
 
     func removeShortWords(_ word: String) -> Bool {
-        return word.characters.count > 2
+        return word.count > 2
     }
 
     func removeStopWords(_ word: String) -> Bool {
