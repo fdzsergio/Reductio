@@ -20,7 +20,7 @@ internal struct Stemmer {
     static func stemmingWordsInText(_ text: String) -> [String] {
         var stems: [String] = []
 
-        let range = NSRange(location: 0, length: text.characters.count)
+        let range = NSRange(location: 0, length: text.count)
         let tagOptions: NSLinguisticTagger.Options = [.omitWhitespace, .omitPunctuation, .omitOther]
         let tagSchemes = NSLinguisticTagger.availableTagSchemes(forLanguage: language)
         let tagger = NSLinguisticTagger(tagSchemes: tagSchemes, options: Int(tagOptions.rawValue))
@@ -28,7 +28,7 @@ internal struct Stemmer {
         tagger.string = text
         tagger.setOrthography(orthography, range: range)
         tagger.enumerateTags(in: range,
-                             scheme: NSLinguisticTagSchemeLemma,
+                             scheme: NSLinguisticTagScheme.lemma,
                              options: tagOptions) { (_, tokenRange, _, _) in
             let token = (text as NSString).substring(with: tokenRange)
             if !token.isEmpty {
