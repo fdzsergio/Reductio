@@ -63,7 +63,7 @@ Reductio.summarize(text, compression: 0.80) { phrases in
 }
 ```
 
-`["Since I have yet to break a sweat in the Rift, I can’t say how easy it is to clean, but the ring is removable and replaceable — although there’s no spare included. ", "While there’s a small focus knob at the bottom, a lot of the screen’s clarity depends on precisely how it’s angled toward your eyes, and it’s easy to give yourself a headache by strapping it as tightly as possible to keep the best fit. ", "The Rift is something I’d be happy to have in my living room, and compared to the developer-focused Oculus devices of years past, it’s a breeze to set up. "]`
+> ["Since I have yet to break a sweat in the Rift, I can’t say how easy it is to clean, but the ring is removable and replaceable — although there’s no spare included. ", "While there’s a small focus knob at the bottom, a lot of the screen’s clarity depends on precisely how it’s angled toward your eyes, and it’s easy to give yourself a headache by strapping it as tightly as possible to keep the best fit. ", "The Rift is something I’d be happy to have in my living room, and compared to the developer-focused Oculus devices of years past, it’s a breeze to set up. "]
 
 ## Acknowledgement
 
