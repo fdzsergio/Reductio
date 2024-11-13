@@ -9,37 +9,44 @@
 import Foundation
 
 internal final class Summarizer {
-
+    
     private let phrases: [Sentence]
     private let rank = TextRank<Sentence>()
-
+    
     init(text: String) {
         self.phrases = text.sentences.map(Sentence.init)
     }
-
-    func execute() -> [String] {
-        buildGraph()
-        return rank.execute()
-            .sorted { $0.1 > $1.1 }
-            .map { $0.0.text }
+    
+    // Asynchronous execute function to avoid blocking the main thread
+    func execute() async -> [String] {
+        await buildGraph()
+        let rankedPhrases = await rank.execute()
+        return rankedPhrases
+            .sorted { $0.value > $1.value }
+            .map { $0.key.text }
     }
-
-    private func buildGraph() {
+    
+    // Asynchronous buildGraph to run independently of the main thread
+    private func buildGraph() async {
         let combinations = self.phrases.combinations(length: 2)
-
-        combinations.forEach { combo in
-            add(edge: combo.first!, node: combo.last!)
+        
+        await withTaskGroup(of: Void.self) { group in
+            for combo in combinations {
+                group.addTask {
+                    self.add(edge: combo.first!, node: combo.last!)
+                }
+            }
         }
     }
-
+    
     private func add(edge pivotal: Sentence, node: Sentence) {
-        let pivotalWordCount: Float = pivotal.words.count
-        let nodeWordCount: Float = node.words.count
-
-        // calculate weight by co-occurrence of words between sentences
-        var score: Float = pivotal.words.filter { node.words.contains($0) }.count
+        let pivotalWordCount: Float = Float(pivotal.words.count)
+        let nodeWordCount: Float = Float(node.words.count)
+        
+        // Calculate weight by co-occurrence of words between sentences
+        var score: Float = Float(pivotal.words.filter { node.words.contains($0) }.count)
         score = score / (log(pivotalWordCount) + log(nodeWordCount))
-
+        
         rank.add(edge: pivotal, to: node, weight: score)
         rank.add(edge: node, to: pivotal, weight: score)
     }
