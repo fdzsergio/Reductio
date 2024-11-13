@@ -78,19 +78,33 @@ internal final class TextRank<T: Hashable> {
 private extension TextRank {
     
     func increment(outlinks source: T) {
+        // Ensures `source` exists and increments its count
         outlinks[source, default: 0] += 1
     }
     
     func add(node from: T, to: T) {
+        // Safeguard to ensure `from` and `to` are of the expected type
+        guard type(of: from) == T.self, type(of: to) == T.self else {
+            fatalError("Expected type \(T.self) for both 'from' and 'to' parameters.")
+        }
+        
+        // Safely adds `from` to the graph structure
         graph[to, default: []].append(from)
         nodes[from] = score
         nodes[to] = score
     }
     
     func add(weight from: T, to: T, weight: Float) {
+        // Similar safeguard to ensure `from` and `to` types are correct
+        guard type(of: from) == T.self, type(of: to) == T.self else {
+            fatalError("Expected type \(T.self) for both 'from' and 'to' parameters.")
+        }
+        
+        // Adds a weighted edge between `from` and `to`
         weights[from, default: [:]][to] = weight
     }
 }
+
 private extension Dictionary where Key: Hashable, Value == Float {
     
     // Single-key subscript with default value
