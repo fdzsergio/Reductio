@@ -48,25 +48,31 @@ internal final class TextRank<T: Hashable> {
         await withTaskGroup(of: Void.self) { group in
             for (node, links) in graph {
                 group.addTask {
-                    let score: Float = links.reduce(0.0) {
-                        $0 + nodes[$1] / outlinks[$1] * weights[$1, node]
+                    let score: Float = links.reduce(0.0) { partialResult, link in
+                        let nodeValue = nodes[link] ?? 0.0
+                        let outlinkValue = self.outlinks[link] ?? 1.0
+                        let weightValue = self.weights[link, node]
+                        return partialResult + (nodeValue / outlinkValue) * weightValue
                     }
-                    vertex[node] = (1 - self.damping) / nodes.count + self.damping * score
+                    vertex[node] = (1 - self.damping) / nodes.floatCount + self.damping * score
                 }
             }
         }
         return vertex
     }
+
     
     // Check for convergence
     private func convergence(_ current: Node, nodes: Node) -> Bool {
         if current == nodes { return true }
         
         let total: Float = nodes.reduce(0.0) {
-            $0 + pow(current[$1.key] - $1.value, 2)
+            let currentValue = current[$1.key] ?? 0.0  // Provide a default value of 0.0 if nil
+            return $0 + pow(currentValue - $1.value, 2)
         }
-        return sqrtf(total / nodes.count) < convergence
+        return sqrtf(total / nodes.floatCount) < convergence
     }
+
 }
 
 private extension TextRank {
@@ -85,18 +91,24 @@ private extension TextRank {
         weights[from, default: [:]][to] = weight
     }
 }
-
 private extension Dictionary where Key: Hashable, Value == Float {
     
+    // Single-key subscript with default value
     subscript (key: Key) -> Float {
         return self[key] ?? 0
     }
     
-    subscript (from: Key, to: Key) -> Float {
-        return (self[from] as? [Key: Float])?[to] ?? 0
-    }
-    
-    var count: Float {
+    // Count property as Float
+    var floatCount: Float {
         return Float(self.count)
     }
 }
+
+private extension Dictionary where Key: Hashable, Value == [Key: Float] {
+    
+    // Double-key subscript with default value
+    subscript (from: Key, to: Key) -> Float {
+        return self[from]?[to] ?? 0
+    }
+}
+

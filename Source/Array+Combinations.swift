@@ -24,19 +24,28 @@ internal extension Array {
     func combinations(length: Int) async -> [[Element]] {
         return await withTaskGroup(of: [Element].self) { group in
             var results: [[Element]] = []
-            for i in 1...length {
+            
+            for _ in 1...length {
                 group.addTask {
-                    [Int](1...i).reduce([([Element](), self)]) { (accum, _) in
-                        accum.flatMap(addCombo)
-                    }.map { $0.0 }
+                    let initial: [([Element], [Element])] = [([], self)]
+                    let combos = initial.reduce(into: [[Element]]()) { result, pair in
+                        let newCombos = self.addCombo(previous: pair.0, pivotal: pair.1)
+                        result.append(contentsOf: newCombos.map { $0.0 })
+                    }
+                    return combos.flatMap { $0 }
                 }
             }
+            
             for await result in group {
-                results.append(contentsOf: result)
+                results.append(result)
             }
+            
             return results
         }
     }
+
+
+
     
     func slice(length: Int) -> [Element] {
         return self.prefix(length).map { $0 }
@@ -48,5 +57,16 @@ internal extension Array {
             return slice(length: count)
         }
         return []
+    }
+}
+
+internal extension Array {
+    func asyncMap<T>(_ transform: (Element) async -> T) async -> [T] {
+        var results = [T]()
+        for element in self {
+            let result = await transform(element)
+            results.append(result)
+        }
+        return results
     }
 }

@@ -16,12 +16,20 @@ internal struct Sentence {
     // Asynchronous factory method for creating a Sentence
     static func create(text: String, stopwords: [String] = stopwords) async -> Sentence {
         let stemmedWords = await Stemmer.stemmingWordsInText(text)
-        let filteredWords = stemmedWords.filter { !Search.binary(stopwords, target: $0) }
+        var filteredWords: [String] = []
+        
+        for word in stemmedWords {
+            if await !Search.binary(stopwords, target: word) {
+                filteredWords.append(word)
+            }
+        }
+        
         return Sentence(text: text, words: filteredWords)
     }
+
     
     // Private initializer to be used by the async factory method
-    private init(text: String, words: [String]) {
+    internal init(text: String, words: [String]) {
         self.text = text
         self.words = words
     }

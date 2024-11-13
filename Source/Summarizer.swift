@@ -13,8 +13,8 @@ internal final class Summarizer {
     private let phrases: [Sentence]
     private let rank = TextRank<Sentence>()
     
-    init(text: String) {
-        self.phrases = text.sentences.map(Sentence.init)
+    init(text: String) async {
+        self.phrases = await text.sentences.asyncMap { await Sentence.create(text: $0) }
     }
     
     // Asynchronous execute function to avoid blocking the main thread
@@ -28,7 +28,7 @@ internal final class Summarizer {
     
     // Asynchronous buildGraph to run independently of the main thread
     private func buildGraph() async {
-        let combinations = self.phrases.combinations(length: 2)
+        let combinations = await self.phrases.combinations(length: 2)
         
         await withTaskGroup(of: Void.self) { group in
             for combo in combinations {
