@@ -28,6 +28,10 @@ final class ReductioTests: XCTestCase {
         XCTAssert("".keywords.isEmpty)
     }
 
+    func testEmptyTextSummarize() {
+        XCTAssert("".summarize.isEmpty)
+    }
+
     func testTextContainsKeywords() {
 
         XCTAssert(keywords.contains("oculus"))

@@ -41,11 +41,15 @@ internal extension String {
 
     var sentences: [String] {
 
-        var sentences = [String]()
-        let range = self.range(of: self)
+        guard !self.isEmpty else { return [] }
 
-        self.enumerateSubstrings(in: range!, options: .bySentences) { (substring, _, _, _) in
-            sentences.append(substring!)
+        var sentences = [String]()
+        let range = startIndex..<endIndex
+
+        self.enumerateSubstrings(in: range, options: .bySentences) { (substring, _, _, _) in
+            if let substring = substring {
+                sentences.append(substring)
+            }
         }
         return sentences
     }
