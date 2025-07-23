@@ -1,0 +1,28 @@
+name: Format
+
+on:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: format-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  swift_format:
+    name: swift-format
+    runs-on: macos-15
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Select Xcode 16.4
+        run: sudo xcode-select -s /Applications/Xcode_16.4.app
+      - name: Format
+        run: | 
+          find . \
+            -path '*/Documentation.docc' -prune -o \
+            -name '*.swift' \
+            -not -path '*/.*' -print0 \
+            | xargs -0 xcrun swift-format --ignore-unparsable-files --in-place

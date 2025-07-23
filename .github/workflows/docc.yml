@@ -1,0 +1,67 @@
+name: Documentation
+
+on:
+  release:
+    types:
+      - published
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: docs-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    runs-on: macos-15
+    steps:
+      - name: Select Xcode 16.4
+        run: sudo xcode-select -s /Applications/Xcode_16.4.app
+
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Prepare docs directory
+        run: mkdir -p docs
+
+      - name: Build documentation
+        run: |
+          echo "Building documentation..."
+          swift package \
+            --allow-writing-to-directory ./docs \
+            generate-documentation \
+            --target Reductio \
+            --output-path ./docs \
+            --transform-for-static-hosting \
+            --hosting-base-path /Reductio
+          
+          # Add .nojekyll file to prevent GitHub Pages from processing files
+          touch docs/.nojekyll
+
+      - name: Fix permissions
+        run: 'sudo chown -R $USER docs'
+
+      - name: Upload Pages Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

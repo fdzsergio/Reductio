@@ -1,0 +1,27 @@
+name: Release
+
+on:
+  release:
+    types:
+      - published
+  workflow_dispatch:
+
+jobs:
+  release-info:
+    name: Release Info
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dump GitHub context
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: echo "$GITHUB_CONTEXT"
+      
+      - name: Display release information
+        if: github.event_name == 'release'
+        run: |
+          echo "🎉 New release published!"
+          echo "Tag: ${{ github.event.release.tag_name }}"
+          echo "Name: ${{ github.event.release.name }}"
+          echo "URL: ${{ github.event.release.html_url }}"
+          echo "Published by: ${{ github.event.release.author.login }}"
+          echo "Created at: ${{ github.event.release.created_at }}"
