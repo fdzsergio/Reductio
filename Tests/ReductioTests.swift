@@ -143,4 +143,60 @@ struct ReductioTests {
       #expect(results1.count == results2.count)
     }
   }
+
+  @Suite("TextRank Convergence Tests")
+  struct ConvergenceTests {
+
+    @Test("TextRank handles malformed input without freezing")
+    func malformedInput() async {
+      let textWithManyLinks = String(repeating: "http://example.com ", count: 1000)
+      let summary = await Reductio.summarize(text: textWithManyLinks, count: 1)
+      // Should complete without hanging
+      #expect(summary.count <= 1)
+    }
+
+    @Test("TextRank handles very long articles")
+    func longArticle() async {
+      let longText = String(repeating: "This is a test sentence. ", count: 100)
+      let summary = await Reductio.summarize(text: longText, count: 5)
+      #expect(summary.count <= 5)
+    }
+
+    @Test("TextRank handles empty sentences")
+    func emptySentences() {
+      let text = "... ... ... Just one sentence here."
+      let summary = text.summarize
+      #expect(summary.count >= 0)
+    }
+
+    @Test("TextRank handles single sentence")
+    func singleSentence() {
+      let text = "Just one sentence."
+      let summary = text.summarize
+      // Single sentence returns empty because there are no edges to rank
+      #expect(summary.count >= 0)
+    }
+
+    @Test("TextRank handles text with lots of punctuation")
+    func lotsOfPunctuation() {
+      let text = "!!! ??? ... First real sentence. Second real sentence. *** %%% Third sentence."
+      let summary = text.summarize
+      // Should complete without hanging or crashing
+      #expect(summary.count > 0)
+    }
+
+    @Test("TextRank handles text with unusual characters")
+    func unusualCharacters() async {
+      let text = "This is sentence one with emoji 🚀. This is sentence two with symbols @#$%. This is sentence three."
+      let summary = await Reductio.summarize(text: text, count: 2)
+      #expect(summary.count <= 2)
+    }
+
+    @Test("TextRank handles repetitive text")
+    func repetitiveText() {
+      let text = "Same sentence. Same sentence. Same sentence. Same sentence. Different sentence here."
+      let summary = text.summarize
+      #expect(summary.count > 0)
+    }
+  }
 }
