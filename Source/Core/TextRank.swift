@@ -9,21 +9,21 @@
 import Foundation
 
 final class TextRank<T: Hashable & Sendable> {
-  /// Configuration for TextRank algorithm execution
+  /// Configuration for TextRank algorithm execution.
   struct Configuration: Sendable {
-    /// Initial score for new nodes (default: 0.15)
+    /// Initial score for new nodes (default: 0.15).
     let initialScore: Float
 
-    /// Damping factor for PageRank calculation (default: 0.85)
+    /// Damping factor for PageRank calculation (default: 0.85).
     let dampingFactor: Float
 
-    /// Convergence threshold (default: 0.01)
+    /// Convergence threshold (default: 0.01).
     let convergenceThreshold: Float
 
-    /// Maximum iterations to prevent infinite loops (default: 100)
+    /// Maximum iterations to prevent infinite loops (default: 100).
     let maxIterations: Int
 
-    /// Minimum iteration count before checking convergence (default: 10)
+    /// Minimum iteration count before checking convergence (default: 10).
     let minIterations: Int
 
     init(
@@ -33,12 +33,12 @@ final class TextRank<T: Hashable & Sendable> {
       maxIterations: Int = 100,
       minIterations: Int = 10
     ) {
-      // Validate parameters
       precondition(initialScore > 0 && initialScore < 1, "Initial score must be between 0 and 1")
       precondition(dampingFactor > 0 && dampingFactor < 1, "Damping factor must be between 0 and 1")
       precondition(convergenceThreshold > 0, "Convergence threshold must be positive")
       precondition(maxIterations > 0, "Max iterations must be positive")
       precondition(minIterations >= 0, "Min iterations must be non-negative")
+      precondition(minIterations <= maxIterations, "Min iterations cannot exceed max iterations")
 
       self.initialScore = initialScore
       self.dampingFactor = dampingFactor
@@ -48,15 +48,12 @@ final class TextRank<T: Hashable & Sendable> {
     }
   }
 
-  typealias Node = [T: Float]
-  typealias Edge = [T: Float]
-  typealias Graph = [T: [T]]
-  typealias Matrix = [T: Node]
+  typealias Scores = [T: Float]
 
-  private var graph = Graph()
-  private var outlinks = Edge()
-  private var nodes = Node()
-  private var weights = Matrix()
+  private var incomingSourcesByNode: [T: [T]] = [:]
+  private var outgoingWeightByNode: [T: Float] = [:]
+  private var scores: Scores = [:]
+  private var weightsBySource: [T: [T: Float]] = [:]
 
   private let configuration: Configuration
 
@@ -64,179 +61,79 @@ final class TextRank<T: Hashable & Sendable> {
     self.configuration = configuration
   }
 
-  func add(edge from: T, to: T, weight: Float = 1.0) {
-    if from == to { return }
+  func add(edge source: T, to destination: T, weight: Float = 1.0) {
+    guard source != destination, weight > 0, weight.isFinite else { return }
 
-    add(node: from, to: to)
-    add(weigth: from, to: to, weight: weight)
-    increment(outlinks: from)
+    let previousWeight = weightsBySource[source]?[destination] ?? 0
+    if previousWeight == 0 {
+      incomingSourcesByNode[destination, default: []].append(source)
+    }
+
+    weightsBySource[source, default: [:]][destination] = previousWeight + weight
+    outgoingWeightByNode[source, default: 0] += weight
+
+    scores[source] = scores[source] ?? configuration.initialScore
+    scores[destination] = scores[destination] ?? configuration.initialScore
   }
 
   /// Executes the TextRank algorithm to calculate node rankings.
-  /// - Returns: Final node rankings, or empty dictionary if execution fails
-  func execute() -> Node {
-    // Validate we have nodes to process
-    guard !nodes.isEmpty else {
-      return Node()
-    }
+  /// - Returns: Final node rankings.
+  func execute() -> Scores {
+    guard !scores.isEmpty else { return [:] }
 
-    var currentNodes = nodes
-    var iterationCount = 0
+    var currentScores = scores
 
-    // Iteratively calculate rankings
-    while iterationCount < configuration.maxIterations {
-      guard let stepNodes = iteration(currentNodes) else {
-        // Invalid calculation detected (NaN/Inf), return best effort
-        return currentNodes
+    for iterationCount in 1...configuration.maxIterations {
+      let nextScores = iteration(currentScores)
+
+      if iterationCount >= configuration.minIterations,
+        hasConverged(nextScores, previous: currentScores)
+      {
+        return nextScores
       }
 
-      iterationCount += 1
-
-      // Only check convergence after minimum iterations
-      if iterationCount >= configuration.minIterations {
-        if hasConverged(stepNodes, previous: currentNodes) {
-          return stepNodes
-        }
-      }
-
-      currentNodes = stepNodes
+      currentScores = nextScores
     }
 
-    // Max iterations reached - return last valid state
-    return currentNodes
+    return currentScores
   }
 
-  /// Performs one iteration to calculate the PageRank ranking for all nodes.
-  /// - Parameter nodes: Current node values
-  /// - Returns: Updated node values, or nil if calculation produces invalid values
-  private func iteration(_ nodes: Node) -> Node? {
-    var vertex = Node()
+  private func iteration(_ currentScores: Scores) -> Scores {
+    let baseScore = (1 - configuration.dampingFactor) / Float(currentScores.count)
+    var nextScores = Scores(minimumCapacity: currentScores.count)
 
-    for (node, links) in graph {
-      // Calculate weighted score from incoming links
-      var score: Float = 0.0
-
-      for link in links {
-        let nodeValue = nodes[link] ?? 0
-        let outlinkValue = outlinks[link] ?? 1
-        let weightValue = weights[link]?[node] ?? 0
-
-        // Guard against division by zero and invalid weights
-        guard outlinkValue > 0, !outlinkValue.isNaN, !outlinkValue.isInfinite else {
-          continue
+    for node in currentScores.keys {
+      let propagatedScore = incomingSourcesByNode[node, default: []].reduce(Float.zero) {
+        total, source in
+        guard
+          let sourceScore = currentScores[source],
+          let outgoingWeight = outgoingWeightByNode[source],
+          let edgeWeight = weightsBySource[source]?[node],
+          outgoingWeight > 0
+        else {
+          return total
         }
 
-        let contribution = nodeValue / outlinkValue * weightValue
-
-        // Check for NaN or infinite values
-        guard !contribution.isNaN, !contribution.isInfinite else {
-          continue
-        }
-
-        score += contribution
+        return total + sourceScore * edgeWeight / outgoingWeight
       }
 
-      // Calculate final vertex value using PageRank formula
-      let nodeCount = Float(nodes.count)
-      guard nodeCount > 0 else { return nil }
-
-      let dampingComponent = (1 - configuration.dampingFactor) / nodeCount
-      let rankComponent = configuration.dampingFactor * score
-      let finalValue = dampingComponent + rankComponent
-
-      // Validate final value
-      guard !finalValue.isNaN, !finalValue.isInfinite else {
-        return nil
-      }
-
-      vertex[node] = finalValue
+      nextScores[node] = baseScore + configuration.dampingFactor * propagatedScore
     }
 
-    return vertex.isEmpty ? nil : vertex
+    return nextScores
   }
 
-  /// Check if the algorithm has converged by comparing consecutive iterations.
-  /// - Parameters:
-  ///   - current: Current node values
-  ///   - previous: Previous node values
-  /// - Returns: True if converged within threshold
-  private func hasConverged(_ current: Node, previous: Node) -> Bool {
-    // Early return if identical
-    if current == previous { return true }
+  private func hasConverged(_ current: Scores, previous: Scores) -> Bool {
+    guard current.count == previous.count else { return false }
 
-    // Calculate root mean square error
-    var sumSquaredDiff: Float = 0.0
-    var validComparisons = 0
-
-    for (key, previousValue) in previous {
-      guard let currentValue = current[key] else { continue }
-
-      // Skip invalid values
-      guard !currentValue.isNaN, !currentValue.isInfinite,
-            !previousValue.isNaN, !previousValue.isInfinite else {
-        continue
-      }
-
-      let diff = currentValue - previousValue
-      sumSquaredDiff += diff * diff
-      validComparisons += 1
+    let sumSquaredDifference = previous.reduce(Float.zero) { total, element in
+      let (node, previousScore) = element
+      let currentScore = current[node] ?? 0
+      let difference = currentScore - previousScore
+      return total + difference * difference
     }
 
-    // If no valid comparisons, consider not converged
-    guard validComparisons > 0 else { return false }
-
-    let rmse = sqrtf(sumSquaredDiff / Float(validComparisons))
-    return rmse < configuration.convergenceThreshold
-  }
-}
-
-private extension TextRank {
-  func increment(outlinks source: T) {
-    if let links = outlinks[source] {
-      outlinks[source] = links + 1
-    } else {
-      outlinks[source] = 1
-    }
-  }
-
-  func add(node from: T, to: T) {
-    if var node = graph[to] {
-      node.append(from)
-      graph[to] = node
-    } else {
-      graph[to] = [from]
-    }
-
-    // Initialize nodes with validated score
-    let initialScore = max(0.0, min(1.0, configuration.initialScore))
-    nodes[from] = nodes[from] ?? initialScore
-    nodes[to] = nodes[to] ?? initialScore
-  }
-
-  func add(weigth from: T, to: T, weight: Float) {
-    if weights[from] == nil {
-      weights[from] = Node()
-    }
-    weights[from]?[to] = weight
-  }
-}
-
-private extension Dictionary {
-  subscript(key: Key) -> Float {
-    return self[key] as? Float ?? 0
-  }
-
-  subscript(from: Key, to: Key) -> Float {
-    guard
-      let row = self[from] as? [Key: Float],
-      let value = row[to]
-    else {
-      return 0
-    }
-    return value
-  }
-
-  var count: Float {
-    return Float(self.count as Int)
+    let rootMeanSquareError = sqrtf(sumSquaredDifference / Float(previous.count))
+    return rootMeanSquareError < configuration.convergenceThreshold
   }
 }

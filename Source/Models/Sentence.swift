@@ -15,12 +15,6 @@ struct Sentence: Equatable, Hashable, Sendable {
   init(text: String) {
     self.text = text
     self.words = Stemmer.stemmingWordsInText(text)
-      .filter { !Search.binary(stopwords, target: $0) }
-  }
-
-  init(text: String, stopwords: [String] = stopwords) {
-    self.text = text
-    self.words = Stemmer.stemmingWordsInText(text)
-      .filter { !Search.binary(stopwords, target: $0) }
+      .filter { !stopwords.contains($0) }
   }
 }

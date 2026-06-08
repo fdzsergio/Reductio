@@ -8,6 +8,16 @@
 
 import Foundation
 
+private func limited<Element>(_ values: [Element], to count: Int) -> [Element] {
+  guard count > 0 else { return [] }
+  return Array(values.prefix(count))
+}
+
+private func compressed<Element>(_ values: [Element], by compression: Float) -> [Element] {
+  guard compression >= 0, compression <= 1 else { return [] }
+  return limited(values, to: Int((1 - compression) * Float(values.count)))
+}
+
 /// The main namespace for Reductio's text analysis functions.
 ///
 /// Reductio provides powerful text summarization and keyword extraction capabilities
@@ -58,7 +68,7 @@ public func keywords(from text: String) async -> [String] {
 /// // Returns: ["swift", "programming", "language"]
 /// ```
 public func keywords(from text: String, count: Int) async -> [String] {
-  text.keywords.slice(length: count)
+  limited(text.keywords, to: count)
 }
 
 /// Extracts keywords from text with a specified compression ratio.
@@ -75,7 +85,7 @@ public func keywords(from text: String, count: Int) async -> [String] {
 /// // Returns top 50% of keywords
 /// ```
 public func keywords(from text: String, compression: Float) async -> [String] {
-  text.keywords.slice(percent: compression)
+  compressed(text.keywords, by: compression)
 }
 
 /// Summarizes text by extracting and reordering sentences by relevance.
@@ -110,7 +120,7 @@ public func summarize(text: String) async -> [String] {
 /// // Returns top 3 most important sentences
 /// ```
 public func summarize(text: String, count: Int) async -> [String] {
-  text.summarize.slice(length: count)
+  limited(text.summarize, to: count)
 }
 
 /// Summarizes text with a specified compression ratio.
@@ -127,7 +137,7 @@ public func summarize(text: String, count: Int) async -> [String] {
 /// // Returns top 30% of sentences
 /// ```
 public func summarize(text: String, compression: Float) async -> [String] {
-  text.summarize.slice(percent: compression)
+  compressed(text.summarize, by: compression)
 }
 
 // MARK: - String Extensions
@@ -144,10 +154,10 @@ public func summarize(text: String, compression: Float) async -> [String] {
 /// - ``keywords``
 /// - ``keywords(count:)``
 ///
-/// ### Text Summarization  
+/// ### Text Summarization
 /// - ``summarize``
 /// - ``summarize(count:)``
-public extension String {
+extension String {
   /// Extracts all keywords from the string sorted by relevance.
   ///
   /// This property provides synchronous access to keyword extraction functionality.
@@ -164,7 +174,7 @@ public extension String {
   ///
   /// - SeeAlso: ``keywords(from:)`` for async version
   /// - SeeAlso: ``keywords(count:)`` to limit results
-  var keywords: [String] {
+  public var keywords: [String] {
     Keyword(text: self).execute()
   }
 
@@ -184,10 +194,10 @@ public extension String {
   ///
   /// - SeeAlso: ``summarize(text:)`` for async version
   /// - SeeAlso: ``summarize(count:)`` to limit sentences
-  var summarize: [String] {
+  public var summarize: [String] {
     Summarizer(text: self).execute()
   }
-  
+
   /// Extracts a specified number of keywords from the string.
   ///
   /// - Parameter count: The maximum number of keywords to extract.
@@ -201,10 +211,10 @@ public extension String {
   /// ```
   ///
   /// - SeeAlso: ``keywords(from:count:)`` for async version
-  func keywords(count: Int) -> [String] {
-    Array(keywords.prefix(count))
+  public func keywords(count: Int) -> [String] {
+    limited(keywords, to: count)
   }
-  
+
   /// Extracts a specified number of sentences for summarization.
   ///
   /// - Parameter count: The maximum number of sentences to extract.
@@ -218,7 +228,7 @@ public extension String {
   /// ```
   ///
   /// - SeeAlso: ``summarize(text:count:)`` for async version
-  func summarize(count: Int) -> [String] {
-    Array(summarize.prefix(count))
+  public func summarize(count: Int) -> [String] {
+    limited(summarize, to: count)
   }
 }

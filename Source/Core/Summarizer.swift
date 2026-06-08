@@ -18,42 +18,54 @@ struct Summarizer: Sendable {
   func execute() -> [String] {
     let rank = TextRank<Sentence>()
     buildGraph(rank: rank)
+
+    let firstIndexBySentence = phrases.enumerated().reduce(into: [Sentence: Int]()) {
+      result, element in
+      let (index, sentence) = element
+      result[sentence] = result[sentence] ?? index
+    }
+
     return rank.execute()
-      .sorted { $0.1 > $1.1 }
-      .map { $0.0.text }
+      .sorted { lhs, rhs in
+        if lhs.value == rhs.value {
+          return firstIndexBySentence[lhs.key, default: Int.max]
+            < firstIndexBySentence[rhs.key, default: Int.max]
+        }
+        return lhs.value > rhs.value
+      }
+      .map { $0.key.text }
   }
 
   private func buildGraph(rank: TextRank<Sentence>) {
-    let combinations = self.phrases.combinations(length: 2)
-
-    combinations.forEach { combo in
-      guard combo.count == 2,
-            let first = combo.first,
-            let last = combo.last
-      else { return }
-      add(edge: first, node: last, rank: rank)
+    for index in phrases.indices.dropLast() {
+      for other in phrases.index(after: index)..<phrases.endIndex {
+        add(edge: phrases[index], node: phrases[other], rank: rank)
+      }
     }
   }
 
   private func add(edge pivotal: Sentence, node: Sentence, rank: TextRank<Sentence>) {
-    let pivotalWordCount: Float = Float(pivotal.words.count)
-    let nodeWordCount: Float = Float(node.words.count)
+    let pivotalWordCount = Float(pivotal.words.count)
+    let nodeWordCount = Float(node.words.count)
+    let denominator = log(pivotalWordCount) + log(nodeWordCount)
 
-    // calculate weight by co-occurrence of words between sentences
-    var score: Float = Float(pivotal.words.filter { node.words.contains($0) }.count)
-    score = score / (log(pivotalWordCount) + log(nodeWordCount))
+    guard denominator > 0 else { return }
+
+    let nodeWords = Set(node.words)
+    let sharedWordCount = pivotal.words.filter { nodeWords.contains($0) }.count
+    let score = Float(sharedWordCount) / denominator
 
     rank.add(edge: pivotal, to: node, weight: score)
     rank.add(edge: node, to: pivotal, weight: score)
   }
 }
 
-
-private extension String {
-  var sentences: [String] {
+extension String {
+  fileprivate var sentences: [String] {
     var sentences = [String]()
 
-    self.enumerateSubstrings(in: self.startIndex..<self.endIndex, options: .bySentences) { (substring, _, _, _) in
+    self.enumerateSubstrings(in: self.startIndex..<self.endIndex, options: .bySentences) {
+      (substring, _, _, _) in
       if let substring = substring {
         sentences.append(substring)
       }

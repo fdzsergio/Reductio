@@ -63,6 +63,18 @@ struct ReductioTests {
     #expect(words.isEmpty)
   }
 
+  @Test("Negative count returns empty")
+  func negativeCountReturnsEmpty() async {
+    #expect("Swift language processing.".keywords(count: -1).isEmpty)
+    #expect("Swift language processing. More text.".summarize(count: -1).isEmpty)
+
+    let keywords = await Reductio.keywords(from: str, count: -1)
+    let summary = await Reductio.summarize(text: str, count: -1)
+
+    #expect(keywords.isEmpty)
+    #expect(summary.isEmpty)
+  }
+
   @Test("Summarize returns non-nil result")
   func hasSummarize() {
     let summary = str.summarize
@@ -94,6 +106,14 @@ struct ReductioTests {
     func onlyStopwords() {
       let keywords = "the and or but if".keywords
       #expect(keywords.isEmpty)
+    }
+
+    @Test("Stopwords are filtered consistently")
+    func stopwordsAreFilteredConsistently() {
+      let keywords = "Anyhow meaningful keyword".keywords
+      #expect(!keywords.contains("anyhow"))
+      #expect(keywords.contains("meaningful"))
+      #expect(keywords.contains("keyword"))
     }
 
     @Test("Text with special characters")
@@ -187,16 +207,26 @@ struct ReductioTests {
 
     @Test("TextRank handles text with unusual characters")
     func unusualCharacters() async {
-      let text = "This is sentence one with emoji 🚀. This is sentence two with symbols @#$%. This is sentence three."
+      let text =
+        "This is sentence one with emoji 🚀. This is sentence two with symbols @#$%. This is sentence three."
       let summary = await Reductio.summarize(text: text, count: 2)
       #expect(summary.count <= 2)
     }
 
     @Test("TextRank handles repetitive text")
     func repetitiveText() {
-      let text = "Same sentence. Same sentence. Same sentence. Same sentence. Different sentence here."
+      let text =
+        "Same sentence. Same sentence. Same sentence. Same sentence. Different sentence here."
       let summary = text.summarize
       #expect(summary.count > 0)
+    }
+
+    @Test("TextRank ignores invalid edge weights")
+    func invalidEdgeWeights() {
+      let rank = TextRank<String>()
+      rank.add(edge: "a", to: "b", weight: .nan)
+      rank.add(edge: "a", to: "c", weight: .infinity)
+      #expect(rank.execute().isEmpty)
     }
   }
 }
